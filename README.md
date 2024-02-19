@@ -6,3 +6,7 @@ First off download the minimal armbian for the OS (all my examples are built on 
 
 https://www.armbian.com/orangepi3-lts/
 
+disable hibanate
+
+<code> sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target </code>
+
