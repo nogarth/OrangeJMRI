@@ -135,7 +135,7 @@ setup the Hotspot
 
 install NetworkMonitor Tray for GUI
 
-<code>sudo apt install nm-tray>/code>
+<code>sudo apt install nm-tray</code>
 
 
 
