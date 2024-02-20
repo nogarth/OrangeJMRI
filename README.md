@@ -4,25 +4,7 @@ setting up JMRI on an Orange Pi with LCD output and Access point for IP
 # Prerequisits
 First off download the minimal armbian for the OS (all my examples are built on Orange Pi 3 LTS)
 
-https://www.armbian.com/orangepi3-lts/
 
-Boot machine with HDMi and Keyboard connected and follow first time setup with your preferences.
-
-![image](https://github.com/nogarth/OrangeJMRI/assets/1279577/63bc7a5d-b240-41fb-b484-4350edec5cb2)
-
-login via putty to your IP of the Orangepi
-
-![image](https://github.com/nogarth/OrangeJMRI/assets/1279577/f19452cc-bdec-4018-ba5e-deb9a4696735)
-
-install armbian-config
-
-<code> sudo apt update && sudo apt install armbian-config </code>
-
-Press Y and Enter to proceed on installing
-
-![image](https://github.com/nogarth/OrangeJMRI/assets/1279577/ea1f1d32-62e1-4928-9e53-740f920e27d4)
-
-![image](https://github.com/nogarth/OrangeJMRI/assets/1279577/4752c497-eb1b-4fbd-b3f7-ae2105b301ce)
 
 Load Armbian Config
 
@@ -45,19 +27,106 @@ Select Network > WiFi
 
 ![image](https://github.com/nogarth/OrangeJMRI/assets/1279577/811d2fda-83ec-44df-9301-cd1c88339218)
 
-setup HotSpot
+Install XFont used by TightVNC server
 
-![image](https://github.com/nogarth/OrangeJMRI/assets/1279577/51f1b348-bd8a-42e5-9d5b-a1aacb948497)
+<code>sudo apt-get install xfonts-base</code>
 
-wlan0
+Install TightVNC server
 
-exit and unmask hostapd
+<code>sudo apt-get install tightvncserver</code>
 
-<code>sudo systemctl unmask hostapd.service
-sudo systemctl enable hostapd.service
-sudo reboot now</code>
+Setup this user for VNC server,
+
+<code>vncserver :1</code>
+
+We need to assign a password. No need to specify a view-only password.
+
+Use the command to confirm the server is running and the default options applied
+
+<code>ps -ef | grep Xtightvnc</code>
+
+VNC Client can now connect to this server, display :1 refers to port 5901. Hence the connection string is <IP Address>:5901.
+
+However, there is no windows shown up, as Armbian distribution does not include any X-window manager. Now we install Xfce, a light weight X-window desktop.
 
 
+<code>sudo apt-get -y install xorg lightdm xfce4 tango-icon-theme gnome-icon-theme dbus-x11</code>
+ 
+Restart VNC server
+
+<code>vncserver -kill :1
+vncserver :1</code>
+ 
+Now the client will show up Xfce desktop over TightVNC.
+ 
+To make TightVNC autostart on OrangePi startup, use systemctl control. Create a new script,
+
+<code>sudo nano /usr/local/bin/tightvncserver</code>
+ 
+The content of this script
+
+<code>#!/bin/bash
+PATH="$PATH:/usr/bin/"
+DISPLAY="1"
+DEPTH="16"
+GEOMETRY="1024x768"
+OPTIONS="-depth ${DEPTH} -geometry ${GEOMETRY} :${DISPLAY}"
+
+case "$1" in
+start)
+/usr/bin/vncserver ${OPTIONS}
+;;
+
+stop)
+/usr/bin/vncserver -kill :${DISPLAY}
+;;
+
+restart)
+$0 stop
+$0 start
+;;
+esac
+exit 0 </code>
+
+Make this script executable,
+<code>sudo chmod +x /usr/local/bin/tightvncserver</code>
+ 
+Setup systemd script
+<code>sudo nano /lib/systemd/system/tightvncserver.service</code>
+ 
+With this content
+
+<code>
+[Unit]
+Description=Manage tightVNC Server
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/tightvncserver start
+ExecStop=/usr/local/bin/tightvncserver stop
+ExecReload=/usr/local/bin/tightvncserver restart
+User=orangepi
+
+[Install]
+WantedBy=multi-user.target 
+</code>
+
+Restart Systemd service and enable tightvncserver,
+
+<code>sudo systemctl daemon-reload
+sudo systemctl enable tightvncserver.service </code>
+  
+Now we have 4 commands to start, stop, restart, and status over tightvncserver,
+<code>sudo systemctl start tightvncserver.service
+sudo systemctl stop tightvncserver.service
+sudo systemctl restart tightvncserver.service
+sudo systemctl status tightvncserver.service</code>
+ 
+16. Reboot Orangepi. Now the connection is ready as OrangePi started.
+
+<code>sudo reboot</code>
+
+nmcli device wifi hotspot ifname wlan0 ssid JMRIPI password "jmripi01"
 
 disable hibanate
 
