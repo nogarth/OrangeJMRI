@@ -114,19 +114,31 @@ WantedBy=multi-user.target
 Restart Systemd service and enable tightvncserver,
 
 <code>sudo systemctl daemon-reload
-sudo systemctl enable tightvncserver.service </code>
+sudo systemctl enable tightvncserver.service</code>
   
 Now we have 4 commands to start, stop, restart, and status over tightvncserver,
-<code>sudo systemctl start tightvncserver.service
+
+<code>
+sudo systemctl start tightvncserver.service
 sudo systemctl stop tightvncserver.service
 sudo systemctl restart tightvncserver.service
-sudo systemctl status tightvncserver.service</code>
+sudo systemctl status tightvncserver.service
+</code>
  
-16. Reboot Orangepi. Now the connection is ready as OrangePi started.
+Reboot Orangepi. Now the connection is ready as OrangePi started.
 
 <code>sudo reboot</code>
 
-nmcli device wifi hotspot ifname wlan0 ssid JMRIPI password "jmripi01"
+setup the Hotspot
+
+<code>sudo nmcli device wifi hotspot ifname wlan0 ssid JMRIPI password "jmripi01"</code>
+
+install NetworkMonitor Tray for GUI
+
+<code>sudo apt install nm-tray>/code>
+
+
+
 
 disable hibanate
 
