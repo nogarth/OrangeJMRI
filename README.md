@@ -129,6 +129,10 @@ Reboot Orangepi. Now the connection is ready as OrangePi started.
 
 <code>sudo reboot</code>
 
+Install Java
+
+<code>sudo apt install default-jdk -y</code>
+
 setup the Hotspot
 
 <code>sudo nmcli device wifi hotspot ifname wlan0 ssid JMRIPI password "jmripi01"</code>
